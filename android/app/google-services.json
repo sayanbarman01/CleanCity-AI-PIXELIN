@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "521582329269",
+    "project_id": "cleancity-ai-9619e",
+    "storage_bucket": "cleancity-ai-9619e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521582329269:android:37241d9b2fd451b5a26dfc",
+        "android_client_info": {
+          "package_name": "com.example.cleancity_ai_pixelin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcvAv2dtI7irqQhV6FoBzaNoXnGjd0FMo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
