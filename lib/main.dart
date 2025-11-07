@@ -4,15 +4,13 @@ import 'firebase_options.dart';
 
 // Screens
 import 'screens/dashboard_screen.dart';
-
+import 'screens/map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const CleanCityAI());
 }
@@ -46,7 +44,7 @@ class _HomeShellState extends State<_HomeShell> {
 
   final _screens = const [
     DashboardScreen(), // States + Districts
-    
+    MapScreen(), // Map + Realtime Bins
   ];
 
   @override
