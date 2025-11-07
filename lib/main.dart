@@ -26,6 +26,29 @@ class CleanCityAI extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.grey[900],
+          indicatorColor: Colors.green[700],
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              );
+            }
+            return TextStyle(
+              color: Colors.grey[400],
+              fontSize: 12,
+            );
+          }),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: Colors.white);
+            }
+            return IconThemeData(color: Colors.grey[400]);
+          }),
+        ),
       ),
       home: const _HomeShell(),
     );
