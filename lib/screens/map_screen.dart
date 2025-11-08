@@ -23,7 +23,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Map")),
-      
+
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.alt_route),
         onPressed: _selectStateDistrict,
@@ -55,11 +55,7 @@ class _MapScreenState extends State<MapScreen> {
                 onTap: () {
                   _editBinFill(context, doc.reference, fill);
                 },
-                child: Icon(
-                  Icons.delete,
-                  size: 32,
-                  color: color,
-                ),
+                child: Icon(Icons.delete, size: 32, color: color),
               ),
             );
           }).toList();
@@ -85,21 +81,24 @@ class _MapScreenState extends State<MapScreen> {
                       points: routePoints,
                       strokeWidth: 5,
                       color: Colors.blue,
-                    )
+                    ),
                   ],
                 ),
             ],
           );
         },
       ),
-      
+
       bottomSheet: (distanceKm > 0)
           ? Container(
               color: Colors.white,
               padding: const EdgeInsets.all(12),
               child: Text(
                 "Distance: ${distanceKm.toStringAsFixed(2)} km | ETA: ${etaMin.toStringAsFixed(1)} min",
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           : null,
@@ -198,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
     }).toList();
 
     // Send to AI backend
-    final url = Uri.parse("http://127.0.0.1:8000/ai_route");
+    final url = Uri.parse("http://sb0101-backend.hf.space/ai_route");
     final res = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -224,14 +223,18 @@ class _MapScreenState extends State<MapScreen> {
         _map.move(routePoints.first, 12);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("AI Route failed")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("AI Route failed")));
     }
   }
 
   // ✅ Edit Bin Fill %
-  void _editBinFill(BuildContext context, DocumentReference ref, double current) {
+  void _editBinFill(
+    BuildContext context,
+    DocumentReference ref,
+    double current,
+  ) {
     final controller = TextEditingController(text: current.toString());
 
     showDialog(
