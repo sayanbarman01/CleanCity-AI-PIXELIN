@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 // Screens
 import 'screens/dashboard_screen.dart';
 import 'screens/map_screen.dart';
+import 'screens/splash_screen.dart'; // ✅ Splash screen import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +38,7 @@ class CleanCityAI extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               );
             }
-            return TextStyle(
-              color: Colors.grey[400],
-              fontSize: 12,
-            );
+            return TextStyle(color: Colors.grey[400], fontSize: 12);
           }),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
@@ -50,19 +48,22 @@ class CleanCityAI extends StatelessWidget {
           }),
         ),
       ),
-      home: const _HomeShell(),
+
+      // ✅ Start with SplashScreen
+      home: const SplashScreen(),
     );
   }
 }
 
-class _HomeShell extends StatefulWidget {
-  const _HomeShell();
+// ✅ Renamed to public (no underscore)
+class HomeShell extends StatefulWidget {
+  const HomeShell({super.key});
 
   @override
-  State<_HomeShell> createState() => _HomeShellState();
+  State<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<_HomeShell> {
+class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
   final _screens = const [
