@@ -55,7 +55,11 @@ class _MapScreenState extends State<MapScreen> {
                 onTap: () {
                   _editBinFill(context, doc.reference, fill);
                 },
-                child: Icon(Icons.delete, size: 32, color: color),
+                child: Icon(
+                  Icons.delete,
+                  size: 32,
+                  color: color,
+                ),
               ),
             );
           }).toList();
@@ -71,9 +75,11 @@ class _MapScreenState extends State<MapScreen> {
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: 'com.cleancity',
               ),
+
+              //  district bins
               MarkerLayer(markers: markers),
 
-              // ✅ AI route polyline
+              //  AI route polyline
               if (routePoints.isNotEmpty)
                 PolylineLayer(
                   polylines: [
@@ -81,6 +87,46 @@ class _MapScreenState extends State<MapScreen> {
                       points: routePoints,
                       strokeWidth: 5,
                       color: Colors.blue,
+                    )
+                  ],
+                ),
+
+              //  START + END POPUP MARKERS
+              if (routePoints.isNotEmpty)
+                MarkerLayer(
+                  markers: [
+                    //  START MARKER (Green)
+                    Marker(
+                      point: routePoints.first,
+                      width: 80,
+                      height: 80,
+                      child: GestureDetector(
+                        onTap: () {
+                          _showPopup("Route Start", routePoints.first);
+                        },
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.green,
+                          size: 38,
+                        ),
+                      ),
+                    ),
+
+                    //  END MARKER (Red Flag)
+                    Marker(
+                      point: routePoints.last,
+                      width: 80,
+                      height: 80,
+                      child: GestureDetector(
+                        onTap: () {
+                          _showPopup("Route End", routePoints.last);
+                        },
+                        child: const Icon(
+                          Icons.flag,
+                          color: Colors.red,
+                          size: 38,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -95,34 +141,45 @@ class _MapScreenState extends State<MapScreen> {
               padding: const EdgeInsets.all(12),
               child: Text(
                 "Distance: ${distanceKm.toStringAsFixed(2)} km | ETA: ${etaMin.toStringAsFixed(1)} min",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             )
           : null,
     );
   }
 
-  // ✅ Select State → District Dialog
+  //  Show popup dialog
+  void _showPopup(String title, LatLng point) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text("Lat: ${point.latitude}\nLng: ${point.longitude}"),
+        actions: [
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () => Navigator.pop(context),
+          )
+        ],
+      ),
+    );
+  }
+
+  //  Select State → District
   void _selectStateDistrict() async {
     String? selectedState;
     String? selectedDistrict;
 
-    // Select State
     selectedState = await _pickState();
     if (selectedState == null) return;
 
-    // Select District
     selectedDistrict = await _pickDistrict(selectedState);
     if (selectedDistrict == null) return;
 
-    // Now fetch bins & compute route
     _computeRoute(selectedState, selectedDistrict);
   }
 
-  // ✅ Pick state
+  //  Pick State
   Future<String?> _pickState() async {
     final states = await FirebaseFirestore.instance.collection("states").get();
 
@@ -142,7 +199,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // ✅ Pick district
+  //  Pick District
   Future<String?> _pickDistrict(String stateId) async {
     final dists = await FirebaseFirestore.instance
         .collection("states")
@@ -166,7 +223,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // ✅ Compute AI Route
+  //  Compute AI Route
   Future<void> _computeRoute(String stateId, String districtId) async {
     showDialog(
       context: context,
@@ -175,7 +232,6 @@ class _MapScreenState extends State<MapScreen> {
           const Center(child: CircularProgressIndicator(strokeWidth: 6)),
     );
 
-    // Fetch bins from Firestore (ONLY selected district)
     final binsSnap = await FirebaseFirestore.instance
         .collection("states")
         .doc(stateId)
@@ -196,15 +252,14 @@ class _MapScreenState extends State<MapScreen> {
       };
     }).toList();
 
-    // Send to AI backend
-    final url = Uri.parse("http://sb0101-backend.hf.space/ai_route");
+ final url = Uri.parse("https://sb0101-backend.hf.space/ai_route");
     final res = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"bins": bins}),
     );
 
-    Navigator.pop(context); // close loading
+    Navigator.pop(context);
 
     if (res.statusCode == 200) {
       final data = jsonDecode(res.body);
@@ -223,18 +278,14 @@ class _MapScreenState extends State<MapScreen> {
         _map.move(routePoints.first, 12);
       }
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("AI Route failed")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("AI Route failed")),
+      );
     }
   }
 
-  // ✅ Edit Bin Fill %
-  void _editBinFill(
-    BuildContext context,
-    DocumentReference ref,
-    double current,
-  ) {
+  //  Edit bin fill %
+  void _editBinFill(BuildContext context, DocumentReference ref, double current) {
     final controller = TextEditingController(text: current.toString());
 
     showDialog(

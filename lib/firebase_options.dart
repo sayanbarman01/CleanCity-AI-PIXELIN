@@ -41,46 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAzp-3g8I6p085A6x5znG9qGKDIlqOuIxc',
-    appId: '1:521582329269:web:937f384839a50ef0a26dfc',
-    messagingSenderId: '521582329269',
-    projectId: 'cleancity-ai-9619e',
-    authDomain: 'cleancity-ai-9619e.firebaseapp.com',
-    storageBucket: 'cleancity-ai-9619e.firebasestorage.app',
+    apiKey: 'AIzaSyCkhyzbRQ10o5cpl5kpx0sPmzeygyVbDwo',
+    appId: '1:533179558094:web:88b4fce74b7b34b8f2c89f',
+    messagingSenderId: '533179558094',
+    projectId: 'cleancityai',
+    authDomain: 'cleancityai.firebaseapp.com',
+    storageBucket: 'cleancityai.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCcvAv2dtI7irqQhV6FoBzaNoXnGjd0FMo',
-    appId: '1:521582329269:android:37241d9b2fd451b5a26dfc',
-    messagingSenderId: '521582329269',
-    projectId: 'cleancity-ai-9619e',
-    storageBucket: 'cleancity-ai-9619e.firebasestorage.app',
+    apiKey: 'AIzaSyC4JGXiqsO_SXy4leH5qdG5d80QQwwrvcI',
+    appId: '1:533179558094:android:571c88178f3ddb7ff2c89f',
+    messagingSenderId: '533179558094',
+    projectId: 'cleancityai',
+    storageBucket: 'cleancityai.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA81Mq5qdB1JCsV1WdvHnnl5-qsHIS7jV0',
-    appId: '1:521582329269:ios:c1f2fa88761820faa26dfc',
-    messagingSenderId: '521582329269',
-    projectId: 'cleancity-ai-9619e',
-    storageBucket: 'cleancity-ai-9619e.firebasestorage.app',
-    iosBundleId: 'com.example.cleancityAiPixelin',
+    apiKey: 'AIzaSyAgpgAj2I1nmC5SdPm9aYmtN_kj-eqAqcg',
+    appId: '1:533179558094:ios:a666a555ec6ca518f2c89f',
+    messagingSenderId: '533179558094',
+    projectId: 'cleancityai',
+    storageBucket: 'cleancityai.firebasestorage.app',
+    iosBundleId: 'com.example.cleancityai',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyA81Mq5qdB1JCsV1WdvHnnl5-qsHIS7jV0',
-    appId: '1:521582329269:ios:c1f2fa88761820faa26dfc',
-    messagingSenderId: '521582329269',
-    projectId: 'cleancity-ai-9619e',
-    storageBucket: 'cleancity-ai-9619e.firebasestorage.app',
-    iosBundleId: 'com.example.cleancityAiPixelin',
+    apiKey: 'AIzaSyAgpgAj2I1nmC5SdPm9aYmtN_kj-eqAqcg',
+    appId: '1:533179558094:ios:a666a555ec6ca518f2c89f',
+    messagingSenderId: '533179558094',
+    projectId: 'cleancityai',
+    storageBucket: 'cleancityai.firebasestorage.app',
+    iosBundleId: 'com.example.cleancityai',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAzp-3g8I6p085A6x5znG9qGKDIlqOuIxc',
-    appId: '1:521582329269:web:6c96f6153129e524a26dfc',
-    messagingSenderId: '521582329269',
-    projectId: 'cleancity-ai-9619e',
-    authDomain: 'cleancity-ai-9619e.firebaseapp.com',
-    storageBucket: 'cleancity-ai-9619e.firebasestorage.app',
+    apiKey: 'AIzaSyCkhyzbRQ10o5cpl5kpx0sPmzeygyVbDwo',
+    appId: '1:533179558094:web:73db1156e01459a7f2c89f',
+    messagingSenderId: '533179558094',
+    projectId: 'cleancityai',
+    authDomain: 'cleancityai.firebaseapp.com',
+    storageBucket: 'cleancityai.firebasestorage.app',
   );
 }
