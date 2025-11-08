@@ -5,6 +5,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
+// ✅ New imports
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
@@ -64,72 +68,112 @@ class _MapScreenState extends State<MapScreen> {
             );
           }).toList();
 
-          return FlutterMap(
-            mapController: _map,
-            options: const MapOptions(
-              initialZoom: 5,
-              initialCenter: LatLng(22.57, 88.36),
-            ),
+          return Stack(
             children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'com.cleancity',
+              FlutterMap(
+                mapController: _map,
+                options: const MapOptions(
+                  initialZoom: 5,
+                  initialCenter: LatLng(22.57, 88.36),
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    userAgentPackageName: 'com.cleancity',
+                  ),
+
+                  // ✅ LIVE LOCATION BLUE DOT
+                  CurrentLocationLayer(
+                  style: const LocationMarkerStyle(
+                      marker: DefaultLocationMarker(
+                        color: Colors.blue,
+                        child: Icon(Icons.my_location, color: Colors.white, size: 16),
+                      ),
+                      markerSize: Size(40, 40),
+                      accuracyCircleColor: Colors.blueAccent,
+                    ),
+                  ),
+
+
+                  // ✅ district bins markers
+                  MarkerLayer(markers: markers),
+
+                  // ✅ AI ROUTE POLYLINE
+                  if (routePoints.isNotEmpty)
+                    PolylineLayer(
+                      polylines: [
+                        Polyline(
+                          points: routePoints,
+                          strokeWidth: 5,
+                          color: Colors.blue,
+                        )
+                      ],
+                    ),
+
+                  // ✅ START & END route markers
+                  if (routePoints.isNotEmpty)
+                    MarkerLayer(
+                      markers: [
+                        // ✅ Start marker
+                        Marker(
+                          point: routePoints.first,
+                          width: 80,
+                          height: 80,
+                          child: GestureDetector(
+                            onTap: () =>
+                                _showPopup("Route Start", routePoints.first),
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.green,
+                              size: 38,
+                            ),
+                          ),
+                        ),
+
+                        // ✅ End marker
+                        Marker(
+                          point: routePoints.last,
+                          width: 80,
+                          height: 80,
+                          child: GestureDetector(
+                            onTap: () =>
+                                _showPopup("Route End", routePoints.last),
+                            child: const Icon(
+                              Icons.flag,
+                              color: Colors.red,
+                              size: 38,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
 
-              //  district bins
-              MarkerLayer(markers: markers),
+              // ✅ LOCATE ME BUTTON (Google-Maps style)
+              Positioned(
+                bottom: 90,
+                right: 16,
+                child: FloatingActionButton(
+                  backgroundColor: Colors.black,
+                  child: const Icon(Icons.my_location, color: Colors.white),
+                  onPressed: () async {
+                    LocationPermission perm =
+                        await Geolocator.requestPermission();
+                    if (perm == LocationPermission.denied ||
+                        perm == LocationPermission.deniedForever) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Location permission required")),
+                      );
+                      return;
+                    }
 
-              //  AI route polyline
-              if (routePoints.isNotEmpty)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: routePoints,
-                      strokeWidth: 5,
-                      color: Colors.blue,
-                    )
-                  ],
+                    Position pos = await Geolocator.getCurrentPosition();
+                    _map.move(LatLng(pos.latitude, pos.longitude), 16);
+                  },
                 ),
-
-              //  START + END POPUP MARKERS
-              if (routePoints.isNotEmpty)
-                MarkerLayer(
-                  markers: [
-                    //  START MARKER (Green)
-                    Marker(
-                      point: routePoints.first,
-                      width: 80,
-                      height: 80,
-                      child: GestureDetector(
-                        onTap: () {
-                          _showPopup("Route Start", routePoints.first);
-                        },
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.green,
-                          size: 38,
-                        ),
-                      ),
-                    ),
-
-                    //  END MARKER (Red Flag)
-                    Marker(
-                      point: routePoints.last,
-                      width: 80,
-                      height: 80,
-                      child: GestureDetector(
-                        onTap: () {
-                          _showPopup("Route End", routePoints.last);
-                        },
-                        child: const Icon(
-                          Icons.flag,
-                          color: Colors.red,
-                          size: 38,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              ),
             ],
           );
         },
@@ -148,7 +192,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  //  Show popup dialog
+  // ✅ Dialog popup for start/end
   void _showPopup(String title, LatLng point) {
     showDialog(
       context: context,
@@ -165,7 +209,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  //  Select State → District
+  // ✅ Select State → District
   void _selectStateDistrict() async {
     String? selectedState;
     String? selectedDistrict;
@@ -179,7 +223,7 @@ class _MapScreenState extends State<MapScreen> {
     _computeRoute(selectedState, selectedDistrict);
   }
 
-  //  Pick State
+  // ✅ Pick State
   Future<String?> _pickState() async {
     final states = await FirebaseFirestore.instance.collection("states").get();
 
@@ -199,7 +243,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  //  Pick District
+  // ✅ Pick District
   Future<String?> _pickDistrict(String stateId) async {
     final dists = await FirebaseFirestore.instance
         .collection("states")
@@ -223,7 +267,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  //  Compute AI Route
+  // ✅ Compute AI Route
   Future<void> _computeRoute(String stateId, String districtId) async {
     showDialog(
       context: context,
@@ -252,7 +296,7 @@ class _MapScreenState extends State<MapScreen> {
       };
     }).toList();
 
- final url = Uri.parse("https://sb0101-backend.hf.space/ai_route");
+    final url = Uri.parse("https://sb0101-backend.hf.space/ai_route");
     final res = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
@@ -284,8 +328,9 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  //  Edit bin fill %
-  void _editBinFill(BuildContext context, DocumentReference ref, double current) {
+  // ✅ Edit bin fill %
+  void _editBinFill(
+      BuildContext context, DocumentReference ref, double current) {
     final controller = TextEditingController(text: current.toString());
 
     showDialog(
