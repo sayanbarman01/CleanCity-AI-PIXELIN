@@ -3,6 +3,45 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'bins_screen.dart';
 import 'chat_screen.dart'; // ✅ ADDED
 
+// ===================== CLEANLINESS CALCULATION ===================== //
+Future<double> _computeDistrictCleanliness(
+  String stateId,
+  String districtId,
+) async {
+  final bins = await FirebaseFirestore.instance
+      .collection("states")
+      .doc(stateId)
+      .collection("districts")
+      .doc(districtId)
+      .collection("bins")
+      .get();
+
+  if (bins.docs.isEmpty) return 100;
+
+  double totalFill = 0;
+  for (var b in bins.docs) {
+    totalFill += (b['fill_percent'] ?? 0).toDouble();
+  }
+  return 100 - (totalFill / bins.docs.length);
+}
+
+Future<double> _computeStateCleanliness(String stateId) async {
+  final distSnap = await FirebaseFirestore.instance
+      .collection("states")
+      .doc(stateId)
+      .collection("districts")
+      .get();
+
+  if (distSnap.docs.isEmpty) return 100;
+
+  double total = 0;
+  for (var d in distSnap.docs) {
+    total += await _computeDistrictCleanliness(stateId, d.id);
+  }
+  return total / distSnap.docs.length;
+}
+
+// ===================== DASHBOARD SCREEN ===================== //
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -10,8 +49,34 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   int _refreshKey = 0;
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Fade animation on Dashboard load
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    );
+
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
 
   Future<void> _onRefresh() async {
     setState(() => _refreshKey++);
@@ -20,6 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return Scaffold(
       backgroundColor: const Color(0xFF1C1C1E),
       appBar: AppBar(
@@ -39,18 +105,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   colors: [Color(0xFF00D4FF), Color(0xFF0077ED)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
+=======
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1C1C1E),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF000000),
+          elevation: 0,
+          title: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00D4FF), Color(0xFF0077ED)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+>>>>>>> origin/main
                 ),
-                borderRadius: BorderRadius.circular(8),
+                child: const Icon(Icons.eco, color: Colors.white, size: 20),
               ),
+<<<<<<< HEAD
               child: const Icon(Icons.eco, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
             const Text("CleanCity",
+=======
+              const SizedBox(width: 12),
+              const Text(
+                "CleanCity",
+>>>>>>> origin/main
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.5,
                   color: Colors.white,
+<<<<<<< HEAD
                 )),
           ],
         ),
@@ -120,12 +214,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             );
           },
+=======
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: RefreshIndicator(
+          onRefresh: _onRefresh,
+          backgroundColor: const Color(0xFF2C2C2E),
+          color: const Color(0xFF0A84FF),
+          child: StreamBuilder<QuerySnapshot>(
+            key: ValueKey(_refreshKey),
+            stream: FirebaseFirestore.instance.collection("states").snapshots(),
+            builder: (context, snap) {
+              if (!snap.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF0A84FF)),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: snap.data!.docs.length,
+                itemBuilder: (context, index) {
+                  return _StateTile(stateDoc: snap.data!.docs[index]);
+                },
+              );
+            },
+          ),
+>>>>>>> origin/main
         ),
       ),
     );
   }
 }
 
+<<<<<<< HEAD
+=======
+// ===================== STATE CARD WIDGET ===================== //
+>>>>>>> origin/main
 class _StateTile extends StatelessWidget {
   final QueryDocumentSnapshot stateDoc;
   const _StateTile({required this.stateDoc});
@@ -158,10 +286,20 @@ class _StateTile extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
+<<<<<<< HEAD
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => DistrictScreen(stateId: stateId),
+=======
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 500),
+                    pageBuilder: (_, __, ___) =>
+                        DistrictScreen(stateId: stateId),
+                    transitionsBuilder: (_, animation, __, child) =>
+                        FadeTransition(opacity: animation, child: child),
+>>>>>>> origin/main
                   ),
                 );
               },
@@ -202,8 +340,10 @@ class _StateTile extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           isLoading
-                              ? const Text("Loading...",
-                                  style: TextStyle(color: Color(0xFF8E8E93)))
+                              ? const Text(
+                                  "Loading...",
+                                  style: TextStyle(color: Color(0xFF8E8E93)),
+                                )
                               : Text(
                                   "${clean.toStringAsFixed(1)}% Clean",
                                   style: TextStyle(
@@ -215,8 +355,16 @@ class _StateTile extends StatelessWidget {
                         ],
                       ),
                     ),
+<<<<<<< HEAD
                     const Icon(Icons.arrow_forward_ios,
                         color: Color(0xFF636366), size: 16),
+=======
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Color(0xFF636366),
+                      size: 16,
+                    ),
+>>>>>>> origin/main
                   ],
                 ),
               ),
@@ -246,6 +394,7 @@ class _StateTile extends StatelessWidget {
   }
 }
 
+<<<<<<< HEAD
 Future<double> _computeStateCleanliness(String stateId) async {
   final distSnap = await FirebaseFirestore.instance
       .collection("states")
@@ -281,6 +430,9 @@ Future<double> _computeDistrictCleanliness(
   return 100 - (totalFill / bins.docs.length);
 }
 
+=======
+// ===================== DISTRICT SCREEN ===================== //
+>>>>>>> origin/main
 class DistrictScreen extends StatefulWidget {
   final String stateId;
   const DistrictScreen({super.key, required this.stateId});
@@ -308,6 +460,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+<<<<<<< HEAD
         title: const Text("Districts",
             style: TextStyle(
               fontSize: 20,
@@ -315,6 +468,17 @@ class _DistrictScreenState extends State<DistrictScreen> {
               letterSpacing: -0.5,
               color: Colors.white,
             )),
+=======
+        title: const Text(
+          "Districts",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.5,
+            color: Colors.white,
+          ),
+        ),
+>>>>>>> origin/main
       ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
@@ -344,7 +508,13 @@ class _DistrictScreenState extends State<DistrictScreen> {
 
                 return FutureBuilder<double>(
                   future: _computeDistrictCleanliness(
+<<<<<<< HEAD
                       widget.stateId, districtId),
+=======
+                    widget.stateId,
+                    districtId,
+                  ),
+>>>>>>> origin/main
                   builder: (context, cleanSnap) {
                     final clean = cleanSnap.data ?? 0;
 
@@ -365,13 +535,21 @@ class _DistrictScreenState extends State<DistrictScreen> {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FirestoreBinsScreen(
-                                  stateId: widget.stateId,
-                                  districtId: districtId,
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                transitionDuration: const Duration(
+                                  milliseconds: 500,
                                 ),
+                                pageBuilder: (_, __, ___) =>
+                                    FirestoreBinsScreen(
+                                      stateId: widget.stateId,
+                                      districtId: districtId,
+                                    ),
+                                transitionsBuilder: (_, animation, __, child) =>
+                                    FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    ),
                               ),
                             );
                           },
@@ -423,8 +601,16 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                     ],
                                   ),
                                 ),
+<<<<<<< HEAD
                                 const Icon(Icons.arrow_forward_ios,
                                     color: Color(0xFF636366), size: 16),
+=======
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFF636366),
+                                  size: 16,
+                                ),
+>>>>>>> origin/main
                               ],
                             ),
                           ),
