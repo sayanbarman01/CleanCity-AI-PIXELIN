@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'bins_screen.dart';
+import 'chat_screen.dart'; // ✅ ADDED
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -12,7 +13,6 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _refreshKey = 0;
 
-  // Pull-to-refresh handler
   Future<void> _onRefresh() async {
     setState(() => _refreshKey++);
     await Future.delayed(const Duration(milliseconds: 500));
@@ -21,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E), // Dark background
+      backgroundColor: const Color(0xFF1C1C1E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF000000),
         elevation: 0,
@@ -31,7 +31,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         title: Row(
           children: [
-            // Mac-style logo
             Container(
               width: 32,
               height: 32,
@@ -46,20 +45,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: const Icon(Icons.eco, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 12),
-            const Text("CleanCity", 
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-                color: Colors.white,
-              )),
+            const Text("CleanCity",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.5,
+                  color: Colors.white,
+                )),
           ],
         ),
       ),
+
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         backgroundColor: const Color(0xFF2C2C2E),
         color: const Color(0xFF0A84FF),
+
         child: StreamBuilder<QuerySnapshot>(
           key: ValueKey(_refreshKey),
           stream: FirebaseFirestore.instance.collection("states").snapshots(),
@@ -69,13 +70,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: CircularProgressIndicator(color: Color(0xFF0A84FF)),
               );
             }
-            
-            return ListView.builder(
+
+            return ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: snap.data!.docs.length,
-              itemBuilder: (context, index) {
-                return _StateTile(stateDoc: snap.data!.docs[index]);
-              },
+              children: [
+                // ✅ ✅ CHATBOT BUTTON HERE
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChatScreen()),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.smart_toy, color: Colors.white, size: 32),
+                        SizedBox(width: 12),
+                        Text(
+                          "Ask CleanCity AI",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ✅ STATE LIST BELOW
+                ...snap.data!.docs
+                    .map((doc) => _StateTile(stateDoc: doc))
+                    .toList(),
+              ],
             );
           },
         ),
@@ -84,10 +126,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// State Card Widget
 class _StateTile extends StatelessWidget {
   final QueryDocumentSnapshot stateDoc;
-
   const _StateTile({required this.stateDoc});
 
   @override
@@ -104,11 +144,10 @@ class _StateTile extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF2C2C2E), // Dark card
+            color: const Color(0xFF2C2C2E),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
@@ -122,7 +161,8 @@ class _StateTile extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DistrictScreen(stateId: stateId)),
+                    builder: (_) => DistrictScreen(stateId: stateId),
+                  ),
                 );
               },
               borderRadius: BorderRadius.circular(16),
@@ -130,7 +170,6 @@ class _StateTile extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    // Gradient Circle Icon
                     Container(
                       width: 60,
                       height: 60,
@@ -149,8 +188,6 @@ class _StateTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    
-                    // State Info
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,10 +215,8 @@ class _StateTile extends StatelessWidget {
                         ],
                       ),
                     ),
-                    
-                    // Arrow
-                    const Icon(Icons.arrow_forward_ios, 
-                      color: Color(0xFF636366), size: 16),
+                    const Icon(Icons.arrow_forward_ios,
+                        color: Color(0xFF636366), size: 16),
                   ],
                 ),
               ),
@@ -192,14 +227,12 @@ class _StateTile extends StatelessWidget {
     );
   }
 
-  // Gradient colors
   List<Color> _getGradientColors(double clean) {
     if (clean >= 80) return [const Color(0xFF32D74B), const Color(0xFF30D158)];
     if (clean >= 50) return [const Color(0xFFFF9F0A), const Color(0xFFFF9500)];
     return [const Color(0xFFFF453A), const Color(0xFFFF3B30)];
   }
 
-  // Solid colors
   Color _getSolidColor(double clean) {
     if (clean >= 80) return const Color(0xFF32D74B);
     if (clean >= 50) return const Color(0xFFFF9F0A);
@@ -213,7 +246,6 @@ class _StateTile extends StatelessWidget {
   }
 }
 
-// Calculate state cleanliness
 Future<double> _computeStateCleanliness(String stateId) async {
   final distSnap = await FirebaseFirestore.instance
       .collection("states")
@@ -230,8 +262,8 @@ Future<double> _computeStateCleanliness(String stateId) async {
   return total / distSnap.docs.length;
 }
 
-// Calculate district cleanliness
-Future<double> _computeDistrictCleanliness(String stateId, String districtId) async {
+Future<double> _computeDistrictCleanliness(
+    String stateId, String districtId) async {
   final bins = await FirebaseFirestore.instance
       .collection("states")
       .doc(stateId)
@@ -249,7 +281,6 @@ Future<double> _computeDistrictCleanliness(String stateId, String districtId) as
   return 100 - (totalFill / bins.docs.length);
 }
 
-// ========== DISTRICT SCREEN ==========
 class DistrictScreen extends StatefulWidget {
   final String stateId;
   const DistrictScreen({super.key, required this.stateId});
@@ -269,7 +300,7 @@ class _DistrictScreenState extends State<DistrictScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E), // Dark background
+      backgroundColor: const Color(0xFF1C1C1E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF000000),
         elevation: 0,
@@ -278,12 +309,12 @@ class _DistrictScreenState extends State<DistrictScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text("Districts",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.5,
-            color: Colors.white,
-          )),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+              color: Colors.white,
+            )),
       ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
@@ -312,18 +343,18 @@ class _DistrictScreenState extends State<DistrictScreen> {
                 final districtId = d.id;
 
                 return FutureBuilder<double>(
-                  future: _computeDistrictCleanliness(widget.stateId, districtId),
+                  future: _computeDistrictCleanliness(
+                      widget.stateId, districtId),
                   builder: (context, cleanSnap) {
                     final clean = cleanSnap.data ?? 0;
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2C2C2E), // Dark card
+                        color: const Color(0xFF2C2C2E),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            // ignore: deprecated_member_use
                             color: Colors.black.withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
@@ -349,7 +380,6 @@ class _DistrictScreenState extends State<DistrictScreen> {
                             padding: const EdgeInsets.all(20),
                             child: Row(
                               children: [
-                                // District Icon
                                 Container(
                                   width: 60,
                                   height: 60,
@@ -368,10 +398,10 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         name,
@@ -393,9 +423,8 @@ class _DistrictScreenState extends State<DistrictScreen> {
                                     ],
                                   ),
                                 ),
-                                
-                                const Icon(Icons.arrow_forward_ios, 
-                                  color: Color(0xFF636366), size: 16),
+                                const Icon(Icons.arrow_forward_ios,
+                                    color: Color(0xFF636366), size: 16),
                               ],
                             ),
                           ),
