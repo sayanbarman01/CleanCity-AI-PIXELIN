@@ -1,6 +1,6 @@
 {
-    "name": "cleancity_ai_pixelin",
-    "short_name": "cleancity_ai_pixelin",
+    "name": "cleancityai",
+    "short_name": "cleancityai",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
